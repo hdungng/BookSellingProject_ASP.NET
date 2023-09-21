@@ -1,5 +1,6 @@
 ﻿using BookSellingProject.Data;
 using BookSellingProject.Models.Domain;
+using BookSellingProject.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +31,7 @@ namespace BookSellingProject.Controllers
 
             var cartsJson = contextAccessor.HttpContext.Session.GetString("Cart");
 
-            if(cartsJson == null && string.IsNullOrEmpty(cartsJson))
+            if (cartsJson == null && string.IsNullOrEmpty(cartsJson))
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -38,7 +39,19 @@ namespace BookSellingProject.Controllers
             // List<>
             var carts = JsonConvert.DeserializeObject<List<CartItem>>(cartsJson);
 
-            return View(carts);
+            var cartViewModel = new List<CartViewModel>();
+
+            foreach(var cart in carts) {
+                cartViewModel.Add(new CartViewModel
+                {
+                    Id = cart.Id,
+                    Book = context.Books.FirstOrDefault(b => b.Id == cart.BookId),
+                    Quantity = cart.Quantity,
+                    SubTotal = cart.SubTotal,
+                });
+            }
+
+            return View(cartViewModel);
         }
 
         [HttpGet]
@@ -51,12 +64,9 @@ namespace BookSellingProject.Controllers
                 return NotFound();
             }
 
-            // check xem sản phẩm đó có tồn tại hay chưa? nếu có rồi, tăng số lượng SP 
             var cartJSON = contextAccessor.HttpContext.Session.GetString("Cart");
 
-            // List<CartItem> cartsDomain 
-            // nếu chưa có giỏ hàng, tạo giỏ hàng
-            if(cartJSON == null)
+            if (cartJSON == null)
             {
                 cartJSON = JsonConvert.SerializeObject(new List<CartItem>());
             }
@@ -64,8 +74,7 @@ namespace BookSellingProject.Controllers
 
             var cartsDomain = JsonConvert.DeserializeObject<List<CartItem>>(cartJSON);
 
-            // check if a Book in CartItem is existed or NOT
-            var existingBook = cartsDomain.FirstOrDefault(cart => cart.Book.Id == id);
+            var existingBook = cartsDomain.FirstOrDefault(cart => cart.BookId == id);
             var quantity = 1;
 
             if (existingBook is null)
@@ -75,11 +84,10 @@ namespace BookSellingProject.Controllers
                     Id = Guid.NewGuid(),
                     Quantity = quantity,
                     SubTotal = quantity * book.Price,
-                    Book = book,
+                    BookId = book.Id,
                 };
                 cartsDomain.Add(cartItem);
 
-                // Add in Session
                 var existingCarts = JsonConvert.SerializeObject(cartsDomain);
                 contextAccessor.HttpContext.Session.SetString("Cart", existingCarts);
                 toastNotification.AddSuccessToastMessage("A Book is added successfully");
@@ -93,7 +101,6 @@ namespace BookSellingProject.Controllers
             existingBook.Quantity = quantity;
             existingBook.SubTotal *= existingBook.Quantity;
 
-            // Add in Session
             var carts = JsonConvert.SerializeObject(cartsDomain);
             contextAccessor.HttpContext.Session.SetString("Cart", carts);
 
@@ -104,17 +111,67 @@ namespace BookSellingProject.Controllers
 
         public async Task<IActionResult> Delete(Guid id)
         {
-            //xóa sản phẩm có $id trong giỏ hàng
+
             var cartJSON = contextAccessor.HttpContext.Session.GetString("Cart");
 
-            // List<CartItem> cartsDomain 
-            // nếu chưa có giỏ hàng, tạo giỏ hàng
-            if (cartJSON == null)
+
+            var cartsDomain = JsonConvert.DeserializeObject<List<CartItem>>(cartJSON);
+
+            foreach (var cart in cartsDomain)
             {
-                cartJSON = JsonConvert.SerializeObject(new List<CartItem>());
+                if (cart.Id == id)
+                {
+                    cartsDomain.Remove(cart);
+                    break;
+                }
             }
-            
+
+            var existingCarts = JsonConvert.SerializeObject(cartsDomain);
+            contextAccessor.HttpContext.Session.SetString("Cart", existingCarts);
+            toastNotification.AddSuccessToastMessage("A Book is deleted successfully");
+
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Update(Guid Id, int Quantity)
+        {
+            var cartJSON = contextAccessor.HttpContext.Session.GetString("Cart");
+
+
+            if (cartJSON != null)
+            {
+
+                var cartsDomain = JsonConvert.DeserializeObject<List<CartItem>>(cartJSON);
+                int subTotal = 0;
+
+                // Id san pham = so luong hien tai
+                foreach (var cart in cartsDomain)
+                {
+                    if (cart.Id == Id)
+                    {
+                        cart.Quantity = Quantity;
+                        var book = context.Books.FirstOrDefault(x => x.Id == cart.BookId);
+                        if (book != null)
+                        {
+                            cart.SubTotal = cart.Quantity * book.Price;
+                            subTotal = cart.SubTotal;
+                        }
+                    }
+                }
+                // Cap nhat
+                var existingCarts = JsonConvert.SerializeObject(cartsDomain);
+                contextAccessor.HttpContext.Session.SetString("Cart", existingCarts);
+
+                return Ok(new
+                {
+                    SubTotal = subTotal,
+                    Total = cartsDomain.Sum(c => c.SubTotal)
+                });
+            }
+
+            return RedirectToAction("Index", "Carts");
+
         }
     }
 }

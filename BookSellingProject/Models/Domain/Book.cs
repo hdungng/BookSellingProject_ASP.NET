@@ -20,7 +20,7 @@
 
         public Guid CategoryId { get; set; }
 
-        // nav
         public Category Category { get; set; }
+
     }
 }

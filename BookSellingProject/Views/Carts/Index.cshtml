@@ -1,4 +1,4 @@
-﻿@model List<BookSellingProject.Models.Domain.CartItem>
+﻿@model List<BookSellingProject.Models.ViewModels.CartViewModel>
 
 @{
     ViewData["Title"] = "Cart";
@@ -12,7 +12,7 @@
         </a>
 
         <span class="stext-109 cl4">
-            Shoping Cart
+            Shopping Cart
         </span>
     </div>
 </div>
@@ -27,45 +27,37 @@
 
                         @if (Model is not null && Model.Any())
                         {
-                            <table class="table-shopping-cart">
-                                <tr class="table_head">
-                                    <th class="column-1">Image</th>
-                                    <th class="column-2">Name</th>
-                                    <th class="column-3">Price</th>
-                                    <th class="column-4">Quantity</th>
-                                    <th class="column-5">Sub-total</th>
-                                    <th class="column-6">Operation</th>
-                                </tr>
-                                @foreach (var item in Model)
-                                {
-                                    <tr class="table_row">
-                                        <td class="column-1">
-                                            <div class="how-itemcart1">
-                                                <img src="@item.Book.Image" alt="IMG">
-                                            </div>
-                                        </td>
-                                        <td class="column-2">@item.Book.Name</td>
-                                        <td class="column-3">@item.Book.Price VND</td>
-                                        <td class="column-4">
-                                            <div class="wrap-num-product flex-w m-l-auto m-r-0">
-                                                <div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
-                                                    <i class="fs-16 zmdi zmdi-minus"></i>
-                                                </div>
-
-                                                <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product1" value="@item.Quantity">
-
-                                                <div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
-                                                    <i class="fs-16 zmdi zmdi-plus"></i>
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        <td class="column-5">@item.SubTotal VND</td>
-                                        <td class="column-6"><a class="btn btn-danger" asp-controller="Cart" asp-action="Delete" asp-route-id="@item.Id">Delete</a></td>
+                            <form asp-action="Update" asp-controller="Carts" method="post">
+                                <table class="table-shopping-cart">
+                                    <tr class="table_head">
+                                        <th class="column-1">Image</th>
+                                        <th class="column-2">Name</th>
+                                        <th class="column-3">Price</th>
+                                        <th class="column">Quantity</th>
+                                        <th class="column-5">Sub-total</th>
+                                        <th class="column-6">Operation</th>
                                     </tr>
-                                }
-                            </table>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr class="table_row">
+                                            <td class="column-1">
+                                                <div class="how-itemcart1">
+                                                    <img src="@item.Book.Image" alt="IMG">
+                                                </div>
+                                            </td>
+                                            <td class="column-2">@item.Book.Name</td>
+                                            <td class="column-3">@item.Book.Price VND</td>
+                                            <td class="column-4">
+                                                <input type="text" hidden readonly name="Id" value="@item.Id">
+                                                <input class="num-order mtext-104 txt-center bg-light" style="width: 80px;" min="1" type="number" name="@item.Id" value="@item.Quantity">
+                                            </td>
 
+                                            <td class="column-5" id="sub_total-@item.Id">@item.SubTotal VND</td>
+                                            <td class="column-6"><a class="btn btn-danger" asp-controller="Carts" asp-action="Delete" asp-route-id="@item.Id">Delete</a></td>
+                                        </tr>
+                                    }
+                                </table>
+                            </form>
                         }
                         else
                         {
@@ -85,7 +77,7 @@
                         </div>
 
                         <div class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10">
-                            Update Cart
+                            Delete Cart
                         </div>
                     </div>
                 </div>
@@ -105,20 +97,60 @@
                         </div>
 
                         <div class="size-209 p-t-1">
-                            <span class="mtext-110 cl2">
+                            <span class="mtext-110 cl2" id="total">
                                 @{
-                                    var sum = @Model.Sum(cart => cart.SubTotal);
+                                    var sum = 0;
+
+                                    if (Model is not null)
+                                    {
+                                        sum = @Model.Sum(cart => cart.SubTotal);
+                                    }
                                 }
-                                 @sum VND
+                                @sum VND
                             </span>
                         </div>
                     </div>
 
-                    <button class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+                    <a asp-controller="Checkout" asp-action="Index" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
                         Proceed to Checkout
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </form>
+
+@section Scripts {
+    <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        $(".num-order").change(function () {
+
+            let id = $(this).attr('name');
+
+            let quantity = $(this).val();
+
+            let data = {
+                Id: id,
+                Quantity: quantity,
+            };
+
+            console.log(data);
+
+            $.ajax({
+                url: "https://localhost:7088/Carts/Update",
+                method: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function (data) {
+                    $("#sub_total-" + id).text(data.subTotal + 'VND');
+                    $('#total').text(data.total + 'VND');
+                },
+            });
+        })
+
+    </script>
+}

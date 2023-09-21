@@ -8,6 +8,5 @@
 
         public DateTime CreatedAt { get; set; }
 
-        public ICollection<Book> Books { get; set; }
     }
 }

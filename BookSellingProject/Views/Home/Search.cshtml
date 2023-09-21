@@ -1,4 +1,4 @@
-﻿@model List<BookSellingProject.Models.Domain.Book>
+﻿@model BookSellingProject.Models.ViewModels.SearchViewModel
 
 @{
     ViewData["Title"] = "Search";
@@ -7,20 +7,53 @@
 <!-- Product -->
 <section class="bg0 p-t-23 p-b-140 mt-5">
     <div class="container">
-        <div class="p-b-10">
-            @if (Model.Count > 0)
-            {
-                <h3 class="ltext-103 cl5">@Model.Count Books Found!</h3>
-            } else
-            {
-                <h3 class="ltext-103 cl5">No Books Found!</h3>
-            }
+        <div class="p-b-16">
+            <h3 class="ltext-103 cl5">Search results for "@Model.Keyword"</h3>
+        </div>
+
+        <div class="flex-w flex-sb-m p-b-52">
+            <div class="flex-w flex-l-m filter-tope-group m-tb-10">
+                @if (Model.Books.Count > 0)
+                {
+                    <p><i> @Model.Books.Count Books Found!</i></p>
+                }
+                else
+                {
+                    <p><i>No Books Found!</i></p>
+                }
+            </div>
+
+            <div class="flex-w flex-c-m m-tb-10">
+                <div class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 js-show-filter">
+                    <i class="icon-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-filter-list"></i>
+                    <i class="icon-close-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
+                    Filter
+                </div>
+
+                <div class="flex-c-m stext-106 cl6 size-105 bor4 pointer hov-btn3 trans-04 m-tb-4 js-show-search">
+                    <i class="icon-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-search"></i>
+                    <i class="icon-close-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
+                    Search
+                </div>
+            </div>
+
+            <!-- Search product -->
+            <div class="dis-none panel-search w-full p-t-10 p-b-15">
+                <form asp-action="Search" asp-controller="Home" method="get" class="bor8 dis-flex p-l-15">
+                    <button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+                        <i class="zmdi zmdi-search"></i>
+                    </button>
+
+                    <input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="keyword" placeholder="Search">
+                </form>
+            </div>
         </div>
 
         <div class="row isotope-grid">
-            @if (Model is not null && Model.Any())
+
+            @if (Model is not null && Model.Books.Any())
             {
-                @foreach (var book in Model)
+                @foreach (var book in Model.Books)
                 {
                     <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
                         <!-- Block2 -->
@@ -54,7 +87,7 @@
                         </div>
                     </div>
                 }
-            } 
+            }
         </div>
     </div>
 </section>

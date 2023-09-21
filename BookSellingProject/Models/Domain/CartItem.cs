@@ -6,12 +6,12 @@ namespace BookSellingProject.Models.Domain
     {
         public Guid Id { get; set; }
 
-        public Book Book { get; set; }
+        public Guid BookId { get; set; }
 
         public int Quantity  { get; set; }
 
         public int SubTotal { get; set; }
 
-        public IdentityUser User { get; set; }
+        public Invoice Invoices { get; set; }
     }
 }

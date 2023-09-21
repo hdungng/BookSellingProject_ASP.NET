@@ -68,10 +68,13 @@ namespace BookSellingProject.Controllers
             var identityUser = new IdentityUser
             {
                 UserName = userViewModel.Username,
-                Email = userViewModel.Email
+                Email = userViewModel.Email,
+                EmailConfirmed = true
             };
 
+
             var identityResult = await userManager.CreateAsync(identityUser, userViewModel.Password);
+
 
             if (identityResult is not null)
             {

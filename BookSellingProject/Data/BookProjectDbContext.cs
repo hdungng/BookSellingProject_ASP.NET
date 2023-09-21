@@ -13,6 +13,7 @@ namespace BookSellingProject.Data
 
         public DbSet<Category> Categories { get; set; }
 
+        public DbSet<Invoice> Invoices { get; set; }
 
         public DbSet<CartItem> CartItems { get; set; }
     }

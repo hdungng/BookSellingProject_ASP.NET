@@ -57,11 +57,17 @@ namespace BookSellingProject.Controllers
         [HttpGet]
         public async Task<IActionResult> Search(string keyword)
         {
-            var books = await context.Books.Where(b => b.Name.Contains(keyword))
+            var books = await context.Books.Where(b => b.Name.Contains(keyword) || b.Category.Name.Contains(keyword))
                 .OrderByDescending(b => b.CreatedAt)
-                .ToListAsync(); 
+                .ToListAsync();
 
-            return View(books);
+            var searchViewModel = new SearchViewModel
+            {
+                Books = books,
+                Keyword = keyword
+            };
+
+            return View(searchViewModel);
 
         }
 

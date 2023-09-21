@@ -1,0 +1,123 @@
+﻿@model BookSellingProject.Models.ViewModels.CreateCheckoutViewModel
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<section class="bg-img1 txt-center p-lr-15 p-tb-92" style="background-image: url('images/bg-01.jpg');">
+    <h2 class="ltext-105 cl0 txt-center">
+        Contact
+    </h2>
+</section>
+
+
+<!-- Content page -->
+<section class="bg0 p-t-104 p-b-116">
+    <div class="container">
+        <div class="flex-w flex-tr">
+            <div class="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md">
+                <form asp-action="Submit">
+                    <h4 class="mtext-105 cl2 txt-center p-b-30">
+                        Checkout
+                    </h4>
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label mtext-110 cl2">Name</label>
+                        <input type="text" class="form-control" id="name" required asp-for="Name">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label mtext-110 cl2">Email address</label>
+                        <input type="email" class="form-control" id="email" required asp-for="Email">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label mtext-110 cl2">Phone number</label>
+                        <input type="text" class="form-control" id="phone" required asp-for="Telephone">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label mtext-110 cl2" for="address">Address</label>
+                        <input type="text" class="form-control" id="address" required asp-for="Address">
+                    </div>
+
+                    <div class="form-floating m-b-20">
+                        <label for="note" class="mtext-110 cl2">Note</label>
+                        <textarea class="form-control" placeholder="Leave a note here" id="note" asp-for="Note"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    @{
+                        var sum = 0;
+
+                        if (Model is not null)
+                        {
+                            sum = @Model.CartItem.Sum(cart => cart.SubTotal);
+                        }
+                    }
+
+                    <input type="text" value="@sum" asp-for="Total" readonly hidden />
+                </form>
+            </div>
+
+            <div class="size-210 bor10 flex-w flex-col-m p-lr-70 p-tb-30 p-lr-15-lg w-full-md">
+                <h4 class="mtext-105 cl2 txt-center p-b-30">
+                    Your Cart
+                </h4>
+
+                @foreach (var item in Model.CartItem)
+                {
+                    <div class="flex-w w-full p-b-42">
+                        <div class="ml-3 p-t-2">
+                            <span class="mtext-110 cl2">
+                                @item.Book.Name
+                            </span>
+
+                            <span class="mtext-110 cl2">
+                                x @item.Quantity
+                            </span>
+
+                            <p class="stext-115 cl1 size-213 p-t-18">
+                                @item.SubTotal VND
+                            </p>
+                        </div>
+                    </div>
+                }
+                <div class="flex-w flex-t p-t-27 p-b-33">
+                    <div class="size-208">
+                        <span class="mtext-101 cl2">
+                            Total:
+                        </span>
+                    </div>
+
+                    <div class="size-209 p-t-1">
+                        <span class="mtext-110 cl2" id="total">
+                            @{
+                                var newSum = 0;
+
+                                if (Model is not null)
+                                {
+                                    newSum = @Model.CartItem.Sum(cart => cart.SubTotal);
+                                }
+                            }
+                            @newSum VND
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Map -->
+<div class="map">
+    <div class="size-303" id="google_map" data-map-x="40.691446" data-map-y="-73.886787" data-pin="images/icons/pin.png" data-scrollwhell="0" data-draggable="1" data-zoom="11"></div>
+</div>
+
+@section Scripts {
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKFWBqlKAGCeS1rMVoaNlwyayu0e0YRes"></script>
+    <script src="~/js/map-custom.js"></script>
+    <!--===============================================================================================-->
+    <script src="~/js/main.js"></script>
+}

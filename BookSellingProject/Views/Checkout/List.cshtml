@@ -1,0 +1,68 @@
+﻿@model IEnumerable<BookSellingProject.Models.Domain.Invoice>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+<div class="row">
+    <div class="container-fluid col-10">
+        <h3 class="ltext-103 cl5 mt-5">
+            All Invoices
+        </h3>
+        
+        <table class="table mt-5">
+            <thead>
+                <tr>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Telephone
+                    </th>
+                    <th>
+                        Email
+                    </th>
+                    <th>
+                        Total
+                    </th>
+                    <th>
+                        Created
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if(Model.Any() && Model.Count() > 0)
+                {
+                    @foreach (var invoice in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => invoice.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => invoice.Telephone)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => invoice.Email)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => invoice.Total)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => invoice.CreatedAt)
+                            </td>
+                            <td>
+                                <a asp-action="Detail" asp-route-id="@invoice.Id">Details</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                
+            </tbody>
+        </table>
+       
+
+    </div>
+</div>
