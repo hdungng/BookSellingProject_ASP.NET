@@ -7,6 +7,7 @@ using NToastNotify;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+// Hello From Branch 1
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<BookProjectDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("BookProjectDbConnectionString")));
